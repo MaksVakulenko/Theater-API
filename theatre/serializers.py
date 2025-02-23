@@ -7,47 +7,83 @@ from theatre.models import (
     Genre,
     Performance,
     Reservation,
-    Ticket
+    Ticket,
 )
 
 
 class TheatreHallSerializer(serializers.ModelSerializer):
     class Meta:
         model = TheatreHall
-        fields = '__all__'
-
-
-class PlaySerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Play
-        fields = '__all__'
+        fields = ("id", "name", "rows", "seats_in_row", "total_seats")
 
 
 class ActorSerializer(serializers.ModelSerializer):
     class Meta:
         model = Actor
-        fields = '__all__'
+        fields = "__all__"
 
 
 class GenreSerializer(serializers.ModelSerializer):
+
     class Meta:
         model = Genre
-        fields = '__all__'
+        fields = "__all__"
+
+
+class PlaySerializer(serializers.ModelSerializer):
+    genres = serializers.PrimaryKeyRelatedField(
+        queryset=Genre.objects.all(), many=True, required=True
+    )
+    actors = serializers.PrimaryKeyRelatedField(
+        queryset=Actor.objects.all(), many=True, required=True
+    )
+
+    class Meta:
+        model = Play
+        fields = ("id", "title", "description", "actors", "genres")
+
+
+class PlayListSerializer(PlaySerializer):
+    genres = serializers.SlugRelatedField(
+        many=True, read_only=True, slug_field="name"
+    )
+    actors = serializers.SlugRelatedField(
+        many=True, read_only=True, slug_field="full_name"
+    )
+
+    class Meta:
+        model = Play
+        fields = (
+            "id",
+            "title",
+            "description",
+            "genres",
+            "actors",
+        )
+
+
+class PlayDetailSerializer(PlaySerializer):
+    genres = GenreSerializer(many=True, read_only=True)
+    actors = ActorSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Play
+        fields = ("id", "title", "description", "actors", "genres")
 
 
 class PerformanceSerializer(serializers.ModelSerializer):
     class Meta:
         model = Performance
-        fields = '__all__'
+        fields = "__all__"
 
 
 class ReservationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Reservation
-        fields = '__all__'
+        fields = "__all__"
 
 
 class TicketSerializer(serializers.ModelSerializer):
     class Meta:
         model = Ticket
-        fields = '__all__'
+        fields = "__all__"

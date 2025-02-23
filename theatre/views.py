@@ -1,4 +1,5 @@
-from rest_framework import mixins
+from rest_framework import mixins, viewsets, status
+from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
 from theatre.models import (
@@ -8,7 +9,7 @@ from theatre.models import (
     Genre,
     Performance,
     Reservation,
-    Ticket
+    Ticket,
 )
 from theatre.serializers import (
     TheatreHallSerializer,
@@ -17,7 +18,9 @@ from theatre.serializers import (
     GenreSerializer,
     PerformanceSerializer,
     ReservationSerializer,
-    TicketSerializer
+    TicketSerializer,
+    PlayListSerializer,
+    PlayDetailSerializer,
 )
 
 
@@ -30,13 +33,42 @@ class TheatreHallViewSet(
     serializer_class = TheatreHallSerializer
 
 
-class PlayViewSet(
-    mixins.CreateModelMixin,
-    mixins.ListModelMixin,
-    GenericViewSet,
-):
-    queryset = Play.objects.all()
+class PlayViewSet(viewsets.ModelViewSet):
+    """
+    List all plays, or retrieve a single play by title.
+    Optionally, filter by title, genres(id), or actors(id).
+    """
+
+    queryset = Play.objects.prefetch_related("genres", "actors")
     serializer_class = PlaySerializer
+
+    @staticmethod
+    def _params_to_ints(qs):
+        return [int(str_id) for str_id in qs.split(",")]
+
+    def get_queryset(self):
+        title = self.request.query_params.get("title")
+        genres = self.request.query_params.get("genres")
+        actors = self.request.query_params.get("actors")
+
+        if title:
+            return self.queryset.filter(title__icontains=title)
+        if genres:
+            genres_ids = self._params_to_ints(genres)
+            return self.queryset.filter(genres__id__in=genres_ids)
+        if actors:
+            actors_ids = self._params_to_ints(actors)
+            return self.queryset.filter(actors__id__in=actors_ids)
+
+        return self.queryset.distinct()
+
+    def get_serializer_class(self):
+        if self.action == "list":
+            return PlayListSerializer
+        if self.action == "retrieve":
+            return PlayDetailSerializer
+
+        return PlaySerializer
 
 
 class ActorViewSet(
