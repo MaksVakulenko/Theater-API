@@ -20,24 +20,16 @@ class TheatreHallSerializer(serializers.ModelSerializer):
 class ActorSerializer(serializers.ModelSerializer):
     class Meta:
         model = Actor
-        fields = "__all__"
+        fields = ("id", "first_name", "last_name", "full_name")
 
 
 class GenreSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = Genre
         fields = "__all__"
 
 
 class PlaySerializer(serializers.ModelSerializer):
-    genres = serializers.PrimaryKeyRelatedField(
-        queryset=Genre.objects.all(), many=True, required=True
-    )
-    actors = serializers.PrimaryKeyRelatedField(
-        queryset=Actor.objects.all(), many=True, required=True
-    )
-
     class Meta:
         model = Play
         fields = ("id", "title", "description", "actors", "genres")
