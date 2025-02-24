@@ -151,7 +151,12 @@ class ReservationViewSet(
     permission_classes = (IsAuthenticated,)
 
     def get_queryset(self):
-        return Reservation.objects.filter(user=self.request.user)
+        return Reservation.objects.filter(
+            user=self.request.user
+        ).prefetch_related(
+            'tickets__performance__play',
+            'tickets__performance__theatre_hall'
+        )
 
     def get_serializer_class(self):
         if self.action == "list":
