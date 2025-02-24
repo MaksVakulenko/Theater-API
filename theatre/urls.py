@@ -8,7 +8,6 @@ from theatre.views import (
     GenreViewSet,
     PerformanceViewSet,
     ReservationViewSet,
-    TicketViewSet,
 )
 
 
@@ -19,7 +18,6 @@ router.register("actors", ActorViewSet)
 router.register("genres", GenreViewSet)
 router.register("performances", PerformanceViewSet)
 router.register("reservations", ReservationViewSet)
-router.register("tickets", TicketViewSet)
 
 urlpatterns = [path("", include(router.urls))]
 

@@ -1,6 +1,7 @@
 from django.contrib.auth.models import User
 from django.core.validators import MinValueValidator
 from django.db import models
+from rest_framework.exceptions import ValidationError
 
 
 class TheatreHall(models.Model):
@@ -91,8 +92,46 @@ class Ticket(models.Model):
         Reservation, on_delete=models.CASCADE, related_name="tickets"
     )
 
+    @staticmethod
+    def validate_ticket(row, seat, theatre_hall, error_to_raise):
+        for ticket_attr_value, ticket_attr_name, theatre_hall_attr_name in [
+            (row, "row", "rows"),
+            (seat, "seat", "seats_in_row"),
+        ]:
+            count_attrs = getattr(theatre_hall, theatre_hall_attr_name)
+            if not (1 <= ticket_attr_value <= count_attrs):
+                raise error_to_raise(
+                    {
+                        ticket_attr_name: f"{ticket_attr_name} "
+                        f"number must be in available range: "
+                        f"(1, {theatre_hall_attr_name}): "
+                        f"(1, {count_attrs})"
+                    }
+                )
+    def clean(self):
+        Ticket.validate_ticket(
+            self.row,
+            self.seat,
+            self.performance.theatre_hall,
+            ValidationError,
+        )
+
+    def save(
+            self,
+            force_insert=False,
+            force_update=False,
+            using=None,
+            update_fields=None,
+            **kwargs
+    ):
+        self.full_clean()
+        return super(Ticket, self).save(
+            force_insert, force_update, using, update_fields
+        )
+
     class Meta:
         unique_together = ("performance", "row", "seat")
+        ordering = ["row", "seat"]
 
     def __str__(self):
         return f"Ticket {self.id}: Row {self.row}, Seat {self.seat}"
