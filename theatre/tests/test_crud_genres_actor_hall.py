@@ -11,9 +11,7 @@ class GenreTests(TestCase):
     def setUp(self):
         self.client = APIClient()
         self.admin_user = get_user_model().objects.create_user(
-            email="admin@admin.com",
-            password="admin123",
-            is_staff=True
+            email="admin@admin.com", password="admin123", is_staff=True
         )
         self.client.force_authenticate(user=self.admin_user)
 
@@ -40,17 +38,12 @@ class ActorTests(TestCase):
     def setUp(self):
         self.client = APIClient()
         self.admin_user = get_user_model().objects.create_user(
-            email="admin@admin.com",
-            password="admin123",
-            is_staff=True
+            email="admin@admin.com", password="admin123", is_staff=True
         )
         self.client.force_authenticate(user=self.admin_user)
 
     def test_create_actor(self):
-        payload = {
-            "first_name": "Tom",
-            "last_name": "Cruise"
-        }
+        payload = {"first_name": "Tom", "last_name": "Cruise"}
         response = self.client.post("/api/theatre/actors/", payload)
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -74,18 +67,12 @@ class TheatreHallTests(TestCase):
     def setUp(self):
         self.client = APIClient()
         self.admin_user = get_user_model().objects.create_user(
-            email="admin@admin.com",
-            password="admin123",
-            is_staff=True
+            email="admin@admin.com", password="admin123", is_staff=True
         )
         self.client.force_authenticate(user=self.admin_user)
 
     def test_create_theatre_hall(self):
-        payload = {
-            "name": "Main Hall",
-            "rows": 20,
-            "seats_in_row": 25
-        }
+        payload = {"name": "Main Hall", "rows": 20, "seats_in_row": 25}
         response = self.client.post("/api/theatre/theater-halls/", payload)
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)

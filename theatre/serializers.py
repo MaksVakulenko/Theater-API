@@ -39,7 +39,9 @@ class PlaySerializer(serializers.ModelSerializer):
 
 class PlayListSerializer(PlaySerializer):
     genres = serializers.SlugRelatedField(
-        many=True, read_only=True, slug_field="name"
+        many=True,
+        read_only=True,
+        slug_field="name"
     )
     actors = serializers.SlugRelatedField(
         many=True, read_only=True, slug_field="full_name"
@@ -92,7 +94,6 @@ class PerformanceListSerializer(PerformanceSerializer):
             "theatre_hall_name",
             "theatre_hall_total_seats",
             "available_seats",
-
         )
         read_only_fields = (
             "play_title",
@@ -109,7 +110,7 @@ class TicketSerializer(serializers.ModelSerializer):
             attrs["row"],
             attrs["seat"],
             attrs["performance"].theatre_hall,
-            ValidationError
+            ValidationError,
         )
         return data
 
@@ -122,7 +123,6 @@ class TicketListSerializer(TicketSerializer):
     performance = PerformanceListSerializer(many=False, read_only=True)
 
 
-
 class TicketSeatsSerializer(TicketSerializer):
     class Meta:
         model = Ticket
@@ -132,7 +132,11 @@ class TicketSeatsSerializer(TicketSerializer):
 class PerformanceDetailSerializer(PerformanceSerializer):
     play = PlayListSerializer(many=False, read_only=True)
     theatre_hall = TheatreHallSerializer(many=False, read_only=True)
-    taken_places = TicketSeatsSerializer(source="tickets", many=True, read_only=True)
+    taken_places = TicketSeatsSerializer(
+        source="tickets",
+        many=True,
+        read_only=True
+    )
 
     class Meta:
         model = Performance
@@ -156,13 +160,19 @@ class ReservationSerializer(serializers.ModelSerializer):
         with transaction.atomic():
             tickets_data = validated_data.pop("tickets")
             reservation = Reservation.objects.create(**validated_data)
-            tickets = [Ticket(reservation=reservation, **ticket_data) for ticket_data in tickets_data]
+            tickets = [
+                Ticket(reservation=reservation, **ticket_data)
+                for ticket_data in tickets_data
+            ]
             Ticket.objects.bulk_create(tickets)
             return reservation
 
 
 class ReservationListSerializer(serializers.ModelSerializer):
-    tickets_count = serializers.IntegerField(source="tickets.count", read_only=True)
+    tickets_count = serializers.IntegerField(
+        source="tickets.count",
+        read_only=True
+    )
 
     class Meta:
         model = Reservation

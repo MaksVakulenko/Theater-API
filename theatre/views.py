@@ -26,7 +26,10 @@ from theatre.serializers import (
     ReservationSerializer,
     TicketSerializer,
     PlayListSerializer,
-    PlayDetailSerializer, PerformanceListSerializer, PerformanceDetailSerializer, ReservationListSerializer,
+    PlayDetailSerializer,
+    PerformanceListSerializer,
+    PerformanceDetailSerializer,
+    ReservationListSerializer,
     ReservationDetailSerializer,
 )
 
@@ -107,8 +110,8 @@ class PerformanceViewSet(viewsets.ModelViewSet):
         .prefetch_related("tickets")
         .annotate(
             available_seats=(
-                    F("theatre_hall__rows") * F("theatre_hall__seats_in_row")
-                    - Count("tickets")
+                F("theatre_hall__rows") * F("theatre_hall__seats_in_row")
+                - Count("tickets")
             )
         )
     )
@@ -162,8 +165,8 @@ class ReservationViewSet(
         return Reservation.objects.filter(
             user=self.request.user
         ).prefetch_related(
-            'tickets__performance__play',
-            'tickets__performance__theatre_hall'
+            "tickets__performance__play",
+            "tickets__performance__theatre_hall"
         )
 
     def get_serializer_class(self):
