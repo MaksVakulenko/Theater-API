@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from rest_framework import mixins, viewsets, status
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
@@ -20,7 +22,7 @@ from theatre.serializers import (
     ReservationSerializer,
     TicketSerializer,
     PlayListSerializer,
-    PlayDetailSerializer,
+    PlayDetailSerializer, PerformanceListSerializer, PerformanceDetailSerializer,
 )
 
 
@@ -89,14 +91,36 @@ class GenreViewSet(
     serializer_class = GenreSerializer
 
 
-class PerformanceViewSet(
-    mixins.CreateModelMixin,
-    mixins.ListModelMixin,
-    GenericViewSet,
-):
-    queryset = Performance.objects.all()
+class PerformanceViewSet(viewsets.ModelViewSet):
+    queryset =(
+        Performance.objects.all()
+        .select_related("play", "theatre_hall")
+    )
     serializer_class = PerformanceSerializer
 
+    def get_queryset(self):
+        date = self.request.query_params.get("date")
+        play_id_str = self.request.query_params.get("play")
+
+        queryset = self.queryset
+
+        if date:
+            date = datetime.strptime(date, "%Y-%m-%d").date()
+            queryset = queryset.filter(show_time__date=date)
+
+        if play_id_str:
+            queryset = queryset.filter(play_id=int(play_id_str))
+
+        return queryset
+
+    def get_serializer_class(self):
+        if self.action == "list":
+            return PerformanceListSerializer
+
+        if self.action == "retrieve":
+            return PerformanceDetailSerializer
+
+        return PerformanceSerializer
 
 class ReservationViewSet(
     mixins.CreateModelMixin,
