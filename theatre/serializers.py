@@ -147,9 +147,16 @@ class ReservationSerializer(serializers.ModelSerializer):
 
 
 class ReservationListSerializer(serializers.ModelSerializer):
+    tickets_count = serializers.IntegerField(source="tickets.count", read_only=True)
+
+    class Meta:
+        model = Reservation
+        fields = ("id", "created_at", "tickets_count")
+
+
+class ReservationDetailSerializer(serializers.ModelSerializer):
     tickets = TicketListSerializer(many=True, read_only=True)
 
     class Meta:
         model = Reservation
         fields = ("id", "created_at", "tickets")
-

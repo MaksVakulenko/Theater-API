@@ -26,6 +26,7 @@ from theatre.serializers import (
     TicketSerializer,
     PlayListSerializer,
     PlayDetailSerializer, PerformanceListSerializer, PerformanceDetailSerializer, ReservationListSerializer,
+    ReservationDetailSerializer,
 )
 
 
@@ -99,7 +100,7 @@ class GenreViewSet(
 
 
 class PerformanceViewSet(viewsets.ModelViewSet):
-    queryset =(
+    queryset = (
         Performance.objects.all()
         .select_related("play", "theatre_hall")
     )
@@ -139,6 +140,7 @@ class ReservationPagination(PageNumberPagination):
 class ReservationViewSet(
     mixins.CreateModelMixin,
     mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
     GenericViewSet,
 ):
     queryset = Reservation.objects.prefetch_related(
@@ -154,6 +156,9 @@ class ReservationViewSet(
     def get_serializer_class(self):
         if self.action == "list":
             return ReservationListSerializer
+
+        if self.action == "retrieve":
+            return ReservationDetailSerializer
 
         return ReservationSerializer
 
