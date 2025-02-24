@@ -1,4 +1,4 @@
-from django.contrib.auth.models import User
+from django.conf import settings
 from django.core.validators import MinValueValidator
 from django.db import models
 from rest_framework.exceptions import ValidationError
@@ -60,26 +60,19 @@ class Performance(models.Model):
     )
     show_time = models.DateTimeField()
 
-    # def available_seats(self):
-    #     total_seats = self.theatre_hall.rows * self.theatre_hall.seats_in_row
-    #     booked_seats = self.tickets.count()
-    #     return total_seats - booked_seats
-
     def __str__(self):
-        # return f"{self.play.title} -
-        # {self.show_time} (Available:
-        # {self.available_seats()})"
         return f"{self.play.title} - {self.show_time}"
 
 
 class Reservation(models.Model):
     user = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name="reservations"
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE
     )
+
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"Reservation {self.id} by {self.user.username}"
+        return str(self.created_at)
 
 
 class Ticket(models.Model):
@@ -103,11 +96,12 @@ class Ticket(models.Model):
                 raise error_to_raise(
                     {
                         ticket_attr_name: f"{ticket_attr_name} "
-                        f"number must be in available range: "
-                        f"(1, {theatre_hall_attr_name}): "
-                        f"(1, {count_attrs})"
+                                          f"number must be in available range: "
+                                          f"(1, {theatre_hall_attr_name}): "
+                                          f"(1, {count_attrs})"
                     }
                 )
+
     def clean(self):
         Ticket.validate_ticket(
             self.row,

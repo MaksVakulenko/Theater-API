@@ -112,9 +112,6 @@ class TicketSerializer(serializers.ModelSerializer):
 class TicketListSerializer(TicketSerializer):
     performance = PerformanceListSerializer(many=False, read_only=True)
 
-    class Meta:
-        model = Ticket
-        fields = ("row", "seat")
 
 
 class TicketSeatsSerializer(TicketSerializer):
@@ -136,18 +133,23 @@ class PerformanceDetailSerializer(PerformanceSerializer):
 class ReservationSerializer(serializers.ModelSerializer):
     tickets = TicketSerializer(many=True, read_only=False, allow_empty=False)
 
+    class Meta:
+        model = Reservation
+        fields = ("id", "created_at", "tickets")
+
     def create(self, validated_data):
         with transaction.atomic():
             tickets_data = validated_data.pop("tickets")
             reservation = Reservation.objects.create(**validated_data)
-            for ticket_data in tickets_data:
-                Ticket.objects.create(reservation=reservation, **ticket_data)
+            tickets = [Ticket(reservation=reservation, **ticket_data) for ticket_data in tickets_data]
+            Ticket.objects.bulk_create(tickets)
             return reservation
+
+
+class ReservationListSerializer(serializers.ModelSerializer):
+    tickets = TicketListSerializer(many=True, read_only=True)
 
     class Meta:
         model = Reservation
         fields = ("id", "created_at", "tickets")
 
-
-class ReservationListSerializer(serializers.ModelSerializer):
-    tickets = TicketListSerializer(many=True, read_only=True)
