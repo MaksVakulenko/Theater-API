@@ -61,3 +61,23 @@ and admin users have access to all operations described below
 - `POST /api/user/token/` - Obtain a new authentication token.
 - `POST /api/user/token/refresh/` - Refresh the authentication token.
 - `POST /api/user/token/verify/` - Verify the authentication token.
+
+
+#### in order to start the server locally, you need to execute a command
+`docker-compose -f docker-compose-local.yaml up --build`<br>
+add to .env.sample<br>
+`export POSTGRES_DB=theatre_db`<br>
+`export POSTGRES_DB_PORT=5432`<br>
+`export POSTGRES_USER=admin`<br>
+`export POSTGRES_PASSWORD=some_password`<br>
+`export POSTGRES_HOST=localhost`<br>
+`export DJANGO_SUPERUSER_PASSWORD=admin`<br>
+
+after start the server 
+`python manage.py startserver`
+
+
+
+
+#### if you want to start the server in docker, you need to execute a command
+ `docker-compose up --build`
