@@ -7,9 +7,7 @@ from rest_framework.exceptions import ValidationError
 class TheatreHall(models.Model):
     name = models.CharField(max_length=255)
     rows = models.PositiveIntegerField(validators=[MinValueValidator(1)])
-    seats_in_row = models.PositiveIntegerField(
-        validators=[MinValueValidator(1)]
-    )
+    seats_in_row = models.PositiveIntegerField(validators=[MinValueValidator(1)])
 
     @property
     def total_seats(self):
@@ -65,10 +63,7 @@ class Performance(models.Model):
 
 
 class Reservation(models.Model):
-    user = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE
-    )
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
 
     created_at = models.DateTimeField(auto_now_add=True)
 

@@ -61,17 +61,17 @@ class PlayViewSet(viewsets.ModelViewSet):
 
     @extend_schema(
         parameters=[
-            OpenApiParameter(name='title', type=str),
-            OpenApiParameter(name='genres', type=str),
-            OpenApiParameter(name='actors', type=str),
+            OpenApiParameter(name="title", type=str),
+            OpenApiParameter(name="genres", type=str),
+            OpenApiParameter(name="actors", type=str),
         ]
     )
     def list(self, request, *args, **kwargs):
         """
-            Returns filtered queryset based on query parameters:
-            - title: Filter by play title
-            - genres: Filter by genre IDs (comma-separated)
-            - actors: Filter by actor IDs (comma-separated)
+        Returns filtered queryset based on query parameters:
+        - title: Filter by play title
+        - genres: Filter by genre IDs (comma-separated)
+        - actors: Filter by actor IDs (comma-separated)
         """
         return super().list(request, *args, **kwargs)
 
@@ -128,8 +128,8 @@ class PerformanceViewSet(viewsets.ModelViewSet):
         .prefetch_related("tickets")
         .annotate(
             available_seats=(
-                    F("theatre_hall__rows") * F("theatre_hall__seats_in_row")
-                    - Count("tickets")
+                F("theatre_hall__rows") * F("theatre_hall__seats_in_row")
+                - Count("tickets")
             )
         )
     )
@@ -138,8 +138,8 @@ class PerformanceViewSet(viewsets.ModelViewSet):
 
     @extend_schema(
         parameters=[
-            OpenApiParameter(name='date', type=str),
-            OpenApiParameter(name='play', type=int),
+            OpenApiParameter(name="date", type=str),
+            OpenApiParameter(name="play", type=int),
         ]
     )
     def list(self, request, *args, **kwargs):
@@ -194,11 +194,8 @@ class ReservationViewSet(
     permission_classes = (IsAuthenticated,)
 
     def get_queryset(self):
-        return Reservation.objects.filter(
-            user=self.request.user
-        ).prefetch_related(
-            "tickets__performance__play",
-            "tickets__performance__theatre_hall"
+        return Reservation.objects.filter(user=self.request.user).prefetch_related(
+            "tickets__performance__play", "tickets__performance__theatre_hall"
         )
 
     def get_serializer_class(self):
